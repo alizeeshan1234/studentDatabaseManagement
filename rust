@@ -1,0 +1,98 @@
+use std::vec;
+
+pub mod StudentManagemant {
+    use std::collections::HashMap;
+    #[derive(Debug)]
+    pub struct Student {
+        pub id : u32,
+        pub name : String,
+        pub age : u32,
+        pub grades : Vec<u32>,
+    }
+
+    impl Student {
+        pub fn new_student(student_id : u32 , student_name : String , student_age : u32 , student_grades : Vec<u32>) -> Student {
+            Student {
+                id : student_id,
+                name : student_name,
+                age : student_age,
+                grades : student_grades,
+            }
+        }
+    }
+
+    #[derive(Debug)]
+    pub struct StudentDatabase {
+        database : HashMap<u32 , Student>,
+    }
+
+    impl StudentDatabase {
+        pub fn new_database() -> StudentDatabase {
+            StudentDatabase {
+                database : HashMap::new(),
+            }
+        }
+
+        pub fn add_student(&mut self , student_id : u32 , student_datails : Student) {
+            self.database.insert(student_id, student_datails);
+        }
+
+        pub fn update_student(&mut self, student_name: String, new_id: u32, new_name: String, new_age: u32, new_grades: Vec<u32>) -> Result<(), String> {
+            let mut student_found = false;
+            for (_, mut student) in &mut self.database {
+                if student.name == student_name {
+                    student.id = new_id;
+                    student.name = new_name.to_string();
+                    student.age = new_age;
+                    student.grades = new_grades;
+                    student_found = true;
+                    break;
+                }
+            }
+            if student_found {
+                Ok(())
+            } else {
+                Err("No such student found".to_string())
+            }
+        }
+
+        pub fn delete_student(&mut self , student_id : u32) {
+            self.database.remove(&student_id);
+        }
+        
+        pub fn view_student_details(&self , student_name : String) -> Result<() , String> {
+            for (_ , students) in &self.database {
+                if students.name == student_name {
+                    println!("{:?}" , students);
+                    return Ok(())
+                }else {
+                    return Err("No such student found".to_string());
+                }
+            }
+            Err("No such student found".to_string())
+        }
+
+        pub fn list_students(&self) {
+            println!("Students : {:?}" , self);
+        }
+
+    }
+
+}
+
+fn main(){
+    use crate::StudentManagemant::*;
+
+    let mut new_database = StudentDatabase::new_database();
+    let student1 = Student::new_student(1, "Harry".to_string(), 22, vec![90 , 80 , 78 ,88 , 43]);
+
+    let student2 = Student::new_student(3, "Ron".to_string(), 19, vec![99 , 99 ,99 ,99 ,99]);
+
+    new_database.add_student(1, student1);
+    new_database.update_student("Harry".to_string(), 2, "Hermione".to_string(), 21, vec![98 , 88 , 87 , 65]);
+    new_database.add_student(2, student2);
+
+    // new_database.delete_student(2);
+    let student_search = new_database.view_student_details("Ron".to_string());
+    new_database.list_students();
+}
